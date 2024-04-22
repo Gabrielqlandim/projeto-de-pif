@@ -1,2 +1,2 @@
 # projeto-de-pif
-Repositorio destinado ao projeto do jogo de pif
+Somos alunos do segundo periodo de ciência da computação na faculdade Cesar School em recife, e esse é o nosso repositório do projeto da cadeira de "PIF",  "Programação imperativa funcional", ministrada pelos nossos professores Pamela Thays Bezerra e Tiago Barros. Mas especificamente, aprendemos C nessa cadeira. Esse projeto é um jogo que vamos fazer em linguagem C e o nome dele é <nome> e se baseia em <no que o jogo é e se baseia>. 
