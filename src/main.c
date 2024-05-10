@@ -10,88 +10,87 @@
 #include "keyboard.h"
 #include "screen.h"
 #include "timer.h"
-#include <unistd.h>
 
 int x = 20, y = 22;
 int incX = 1, incY = 1;
 int bulletX = -1, bulletY = -1;
 int bulletSpeed = 100000;
 
+void movimentar(char ch);
+
+void printBullet() {
+  static int ch = 0;
+  screenSetColor(YELLOW, DARKGRAY);
+  screenGotoxy(bulletX, bulletY);
+
+  for (int i = 0; i < 20; i++) {
+    screenGotoxy(bulletX, bulletY - i);
+    printf("^");
+    usleep(bulletSpeed);
+    screenUpdate();
+    screenGotoxy(bulletX, bulletY - i);
+    printf("  ");
+  }
+  bulletX = -1;
+  bulletY = -1;
+
+  movimentar(ch);
+
+  bulletX = -1;
+  bulletY = -1;
+}
+
+void movimentar(char ch) {
+  if (ch == 'a' || ch == 'A') {
+    if (x > 2) { // Verifica se não está no limite esquerdo
+      screenGotoxy(x, y);
+      printf("  ");
+      x -= 1;
+      screenGotoxy(x, y);
+      printf(" △ ");
+    }
+  } else if (ch == 'd' || ch == 'D') {
+    if (x < 36) { // Verifica se não está no limite direito
+      screenGotoxy(x, y);
+      printf("  ");
+      x += 1;
+      screenGotoxy(x, y);
+      printf(" △ ");
+    }
+  }
+  if (ch == ' ') {
+    bulletX = x + 1;
+    bulletY = y - 1;
+    printBullet();
+  }
+}
+
+void enemies() {
+  int x = 7, y = 3;
+
+  char inimigos[5][10] = {{'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M'},
+                          {'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M'},
+                          {'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M'},
+                          {'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M'},
+                          {'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M'}};
+
+  for (int i = 0; i < 5; i++) {
+    for (int j = 0; j < 10; j++) {
+      screenGotoxy(x + j * 3,
+                   y + i * 2); // Posiciona-se para imprimir o inimigo atual
+      printf("%c", inimigos[i][j]); // Imprime o inimigo atual
+      printf("  ");
+    }
+  }
+}
 void printHello(int nextX, int nextY) {
   static int ch = 0;
   screenSetColor(CYAN, DARKGRAY);
   screenGotoxy(x, y);
   printf(" △ ");
 
-  if (keyhit()) {
-    ch = readch();
-
-    if (ch == 'a' || ch == 'A') {
-      if (x > 2) { // Verifica se não está no limite esquerdo
-        screenGotoxy(x, y);
-        printf("  ");
-        x -= 1;
-        screenGotoxy(x, y);
-        printf(" △ ");
-      }
-    } else if (ch == 'd' || ch == 'D') {
-      if (x < 36) { // Verifica se não está no limite direito
-        screenGotoxy(x, y);
-        printf("  ");
-        x += 1;
-        screenGotoxy(x, y);
-        printf(" △ ");
-      }
-    }
-  }
+  movimentar(ch);
 }
-
-void printBullet() {
-  static int ch = 0;
-  if (bulletX != -1 && bulletY != -1) { // Se houver uma bala
-    screenSetColor(YELLOW, DARKGRAY);
-    screenGotoxy(bulletX, bulletY);
-
-    for (int i = 0; i < 10; i++) {
-        screenGotoxy(bulletX, bulletY - i);
-        printf("^");
-        usleep(bulletSpeed);
-        screenUpdate();
-        screenGotoxy(bulletX, bulletY - i);
-        printf("  ");
-
-
-      }
-      bulletX = -1;
-      bulletY = -1;
-    
-    
-      if (keyhit()) {
-        ch = readch();
-
-        if (ch == 'a' || ch == 'A') {
-          if (x > 2) { // Verifica se não está no limite esquerdo
-            screenGotoxy(x, y);
-            printf("  ");
-            x -= 1;
-            screenGotoxy(x, y);
-            printf(" △ ");
-          }
-        } else if (ch == 'd' || ch == 'D') {
-          if (x < 36) { // Verifica se não está no limite direito
-            screenGotoxy(x, y);
-            printf("  ");
-            x += 1;
-            screenGotoxy(x, y);
-            printf(" △ ");
-          }
-        }
-      }
-      bulletX = -1;
-      bulletY = -1;
-    }
-  }
-
 
 int main() {
   static int ch = 0;
@@ -102,8 +101,7 @@ int main() {
 
   screenUpdate();
 
-  screenGotoxy(20, 30);
-  printf("sexo");
+  enemies();
 
   while (ch != 10) // enter
   {
@@ -111,13 +109,8 @@ int main() {
     if (keyhit()) {
       ch = readch();
 
-      if (ch == ' ') {
-        bulletX = x + 1;
-        bulletY = y - 1;
-        printBullet();
-      }
+      movimentar(ch);
       printHello(x, y);
-
       screenUpdate();
     }
 
