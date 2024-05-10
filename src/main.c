@@ -19,7 +19,6 @@ int bulletSpeed = 100000;
 void movimentar(char ch);
 
 void printBullet() {
-  static int ch = 0;
   screenSetColor(YELLOW, DARKGRAY);
   screenGotoxy(bulletX, bulletY);
 
@@ -30,14 +29,15 @@ void printBullet() {
     screenUpdate();
     screenGotoxy(bulletX, bulletY - i);
     printf("  ");
+    
+    screenSetColor(CYAN, DARKGRAY);
+
+    if (keyhit()) {
+      char ch = readch();
+      movimentar(ch);
+      ch = 0;
+    }
   }
-  bulletX = -1;
-  bulletY = -1;
-
-  movimentar(ch);
-
-  bulletX = -1;
-  bulletY = -1;
 }
 
 void movimentar(char ch) {
