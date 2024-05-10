@@ -34,8 +34,11 @@ void printBullet() {
 
     if (keyhit()) {
       char ch = readch();
+      if(ch == 'a' || ch == 'A'|| ch == 'd' || ch == 'D' ){
+
       movimentar(ch);
       ch = 0;
+      }
     }
   }
 }

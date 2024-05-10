@@ -5,7 +5,7 @@ CC = gcc
 CFLAGS = -I./../include  
 
 # Nome do arquivo executável final
-TARGET = pif_game
+TARGET = pif
 
 # Arquivos objeto correspondentes aos arquivos fonte
 OBJ = main.o screen.o timer.o keyboard.o
