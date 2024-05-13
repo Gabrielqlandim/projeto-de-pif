@@ -15,8 +15,25 @@ int x = 20, y = 22;
 int incX = 1, incY = 1;
 int bulletX = -1, bulletY = -1;
 int bulletSpeed = 100000;
+struct enemies{
+  char m;
+  int vivo;
+};
+
+struct enemies enemy[5][10];
+
+void matrizglobal(){
+   for(int i=0;i<5;i++){
+     for(int j=0; j<10; j++){
+        enemy[i][j].m = 'M';
+        enemy[i][j].vivo = 1;
+     }
+   }
+}
 
 void movimentar(char ch);
+
+int colisaoInimigo();
 
 void printBullet() {
   screenSetColor(YELLOW, DARKGRAY);
@@ -29,9 +46,14 @@ void printBullet() {
     screenUpdate();
     screenGotoxy(bulletX, bulletY - i);
     printf("  ");
+    enemies();
     
     screenSetColor(CYAN, DARKGRAY);
-
+    
+    if(colisaoInimigo(bulletX, bulletY - i)){
+      break;
+    }
+    
     if (keyhit()) {
       char ch = readch();
       if(ch == 'a' || ch == 'A'|| ch == 'd' || ch == 'D' ){
@@ -71,20 +93,32 @@ void movimentar(char ch) {
 void enemies() {
   int x = 7, y = 3;
 
-  char inimigos[5][10] = {{'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M'},
-                          {'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M'},
-                          {'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M'},
-                          {'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M'},
-                          {'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M'}};
-
   for (int i = 0; i < 5; i++) {
     for (int j = 0; j < 10; j++) {
       screenGotoxy(x + j * 3,
                    y + i * 2); // Posiciona-se para imprimir o inimigo atual
-      printf("%c", inimigos[i][j]); // Imprime o inimigo atual
+      printf("%c", enemy[i][j].m); // Imprime o inimigo atual
       printf("  ");
     }
   }
+}
+
+int colisaoInimigo(int bulletX, int bulletY){
+  int x = 7, y = 3;
+  
+  for (int i = 0; i < 5; i++) {
+    for (int j = 0; j < 10; j++) {
+      if(bulletX == x + j * 3 && bulletY == y + i * 2 && enemy[i][j].vivo == 1){
+
+        enemy[i][j].vivo = 0;
+        enemy[i][j].m = ' ';
+        enemies();
+        return 1;
+      }
+    }
+  }
+
+  return 0;
 }
 void printHello(int nextX, int nextY) {
   static int ch = 0;
@@ -97,14 +131,14 @@ void printHello(int nextX, int nextY) {
 
 int main() {
   static int ch = 0;
-
+  
   screenInit(1);
   keyboardInit();
   timerInit(50);
 
   screenUpdate();
 
-  enemies();
+  matrizglobal();
 
   while (ch != 10) // enter
   {
@@ -130,6 +164,7 @@ int main() {
 
       screenUpdate();
     }
+    enemies();
   }
 
   keyboardDestroy();
