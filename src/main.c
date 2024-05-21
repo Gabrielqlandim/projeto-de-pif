@@ -16,6 +16,13 @@ int x = 20, y = 22;
 int incX = 1, incY = 1;
 int bulletX = -1, bulletY = -1;
 int bulletSpeed = 100000;
+
+int direction = 'r'; // Direção inicial: 'r' (direita)
+int drop = 0; // Necessidade de descer
+int enemySpeed = 10;
+int i = 0; 
+
+int startX = 7, startY = 3;
 struct enemies{
   char m;
   int vivo;
@@ -92,24 +99,30 @@ void movimentar(char ch) {
 }
 
 void enemies() {
-  int x = 7, y = 3;
+  int enemyWidth = 3, enemyHeight = 2;
+  
+  if (direction == 'l') {
+    startX -= 1; // Move para a esquerda
+  } else {
+    startX+= 1; // Move para a direita
+  }
 
   for (int i = 0; i < 5; i++) {
     for (int j = 0; j < 10; j++) {
-      screenGotoxy(x + j * 3,
-                   y + i * 2); // Posiciona-se para imprimir o inimigo atual
-      printf("%c", enemy[i][j].m); // Imprime o inimigo atual
+      movimentar(ch);
+      screenGotoxy(startX + j * 3,
+                   startY + i * 2); // Posiciona-se para imprimir o inimigo atual
+      printf("  %c", enemy[i][j].m); // Imprime o inimigo atual
       printf("  ");
     }
   }
 }
 
 int colisaoInimigo(int bulletX, int bulletY){
-  int x = 7, y = 3;
   
   for (int i = 0; i < 5; i++) {
     for (int j = 0; j < 10; j++) {
-      if(bulletX == x + j * 3 && bulletY == y + i * 2 && enemy[i][j].vivo == 1){
+      if(bulletX == startX + j * 3 && bulletY ==startY + i * 2 && enemy[i][j].vivo == 1){
 
         enemy[i][j].vivo = 0;
         enemy[i][j].m = 'X';
@@ -157,6 +170,7 @@ int main() {
       screenUpdate();
     }
     enemies();
+    usleep(500000);
   }
 
   keyboardDestroy();
