@@ -6,6 +6,7 @@
  */
 
 #include <string.h>
+#include <unistd.h> 
 
 #include "keyboard.h"
 #include "screen.h"
@@ -111,6 +112,11 @@ int colisaoInimigo(int bulletX, int bulletY){
       if(bulletX == x + j * 3 && bulletY == y + i * 2 && enemy[i][j].vivo == 1){
 
         enemy[i][j].vivo = 0;
+        enemy[i][j].m = 'X';
+        enemies();
+        screenUpdate();
+        usleep(200000);
+        
         enemy[i][j].m = ' ';
         enemies();
         return 1;
