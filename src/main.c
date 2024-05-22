@@ -5,8 +5,10 @@
  * Based on "From C to C++ course - 2002"
  */
 
+#include <stdlib.h>
 #include <string.h>
-#include <unistd.h> 
+#include <time.h>
+#include <unistd.h>
 
 #include "keyboard.h"
 #include "screen.h"
@@ -15,22 +17,26 @@
 int x = 20, y = 22;
 int incX = 1, incY = 1;
 int bulletX = -1, bulletY = -1;
-int bulletSpeed = 50000;
+int bulletSpeed = 150000;
 
-struct enemies{
+struct enemies {
   char m;
   int vivo;
 };
 
 struct enemies enemy[5][10];
 
-void matrizglobal(){
-   for(int i=0;i<5;i++){
-     for(int j=0; j<10; j++){
-        enemy[i][j].m = 'M';
-        enemy[i][j].vivo = 1;
-     }
-   }
+void matrizglobal() {
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 10; j++) {
+      enemy[i][j].m = 'M';
+      enemy[i][j].vivo = 1;
+    }
+  }
+  for (int j = 0; j < 10; j++) {
+    enemy[4][j].m = 'O';
+    enemy[4][j].vivo = 1;
+  }
 }
 
 void movimentar(char ch);
@@ -49,19 +55,19 @@ void printBullet() {
     screenGotoxy(bulletX, bulletY - i);
     printf("  ");
     enemies();
-    
+
     screenSetColor(CYAN, DARKGRAY);
-    
-    if(colisaoInimigo(bulletX, bulletY - i)){
+
+    if (colisaoInimigo(bulletX, bulletY - i)) {
       break;
     }
-    
+
     if (keyhit()) {
       char ch = readch();
-      if(ch == 'a' || ch == 'A'|| ch == 'd' || ch == 'D' ){
+      if (ch == 'a' || ch == 'A' || ch == 'd' || ch == 'D') {
 
-      movimentar(ch);
-      ch = 0;
+        movimentar(ch);
+        ch = 0;
       }
     }
   }
@@ -91,33 +97,32 @@ void movimentar(char ch) {
     printBullet();
   }
 }
-
 void enemies() {
   int x = 7, y = 3;
 
   for (int i = 0; i < 5; i++) {
     for (int j = 0; j < 10; j++) {
       screenGotoxy(x + j * 3,
-                   y + i * 2); // Posiciona-se para imprimir o inimigo atual
+                   y + i * 2);     // Posiciona-se para imprimir o inimigo atual
       printf("%c", enemy[i][j].m); // Imprime o inimigo atual
       printf("  ");
     }
   }
 }
-
-int colisaoInimigo(int bulletX, int bulletY){
+int colisaoInimigo(int bulletX, int bulletY) {
   int x = 7, y = 3;
 
   for (int i = 0; i < 5; i++) {
     for (int j = 0; j < 10; j++) {
-      if(bulletX == x + j * 3 && bulletY ==y + i * 2 && enemy[i][j].vivo == 1){
+      if (bulletX == x + j * 3 && bulletY == y + i * 2 &&
+          enemy[i][j].vivo == 1) {
 
         enemy[i][j].vivo = 0;
         enemy[i][j].m = 'X';
         enemies();
         screenUpdate();
         usleep(200000);
-        
+
         enemy[i][j].m = ' ';
         enemies();
         return 1;
@@ -136,9 +141,50 @@ void printHello(int nextX, int nextY) {
   movimentar(ch);
 }
 
+void enemyShoot() {
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 10; j++) {
+            if (enemy[i][j].vivo && i < 4 && !enemy[i + 1][j].vivo) {
+                
+                    int bulletX = (7 + j * 3 + 1) - 1;   // Posição x da bala
+                    int bulletY = 3 + i * 2 + 1;   // Posição y da bala
+                    // Disparar a bala
+                    
+                    for(int l = 0; l < 20; l++){
+                      screenSetColor(RED, DARKGRAY);
+                      screenGotoxy(bulletX, bulletY + l);
+                      printf("*");
+                      usleep(bulletSpeed);
+                      screenUpdate();
+
+                      screenGotoxy(bulletX, bulletY + l);
+                      printf(" ");
+
+                      if (keyhit()) {
+                        char ch = readch();
+                        if (ch == 'a' || ch == 'A' || ch == 'd' || ch == 'D' || ch == ' ') {
+
+                          movimentar(ch);
+                          ch = 0;
+                        }
+                      }
+                      if(bulletY + l == 22){
+                        break;
+                      }
+                    }      
+                  
+                    // Apagar a bala após um curto intervalo
+                    screenGotoxy(bulletX, bulletY);
+                    printf(" ");
+                }
+            }
+        }
+    }
+
+
 int main() {
   static int ch = 0;
-  
+
   screenInit(1);
   keyboardInit();
   timerInit(50);
@@ -149,6 +195,7 @@ int main() {
 
   while (ch != 10) // enter
   {
+    enemyShoot();
     // Handle user input
     if (keyhit()) {
       ch = readch();
