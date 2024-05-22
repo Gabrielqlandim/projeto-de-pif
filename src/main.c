@@ -46,7 +46,10 @@ int colisaoInimigo() {
 
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 10; j++) {
-      if ((bulletX == startX + j * 3 || bulletX == (startX + j * 3)+1 || bulletX == (startX + j * 3)-1) && (bulletY == startY + i * 2 || bulletY == (startY + i * 2)-1 || bulletY == (startY + i * 2)+1) &&
+      if ((bulletX == startX + j * 3 || bulletX == (startX + j * 3) + 1 ||
+           bulletX == (startX + j * 3) - 1) &&
+          (bulletY == startY + i * 2 || bulletY == (startY + i * 2) - 1 ||
+           bulletY == (startY + i * 2) + 1) &&
           enemy[i][j].vivo == 1) {
         enemy[i][j].vivo = 0;
         enemy[i][j].m = 'X';
@@ -64,17 +67,18 @@ void enemyBulletSpawn() {
     return;
 
   srand(time(NULL));
+  for (int q = 0; q < 4; q++) {
+    int randI = rand() % 10;
+    int randJ = rand() % 4;
 
-  int randx = rand() % 10;
-  int randy = rand() % 4;
+    if (enemy[randI][randJ].vivo) {
 
-  if (enemy[randx][randy].vivo) {
+      enemybalaativa = 0;
+      enemybulletX = startX + randI * 3;
+      enemybulletY = startX + randJ * 2;
 
-    enemybalaativa = 0;
-    enemybulletX = startX + randx * 3;
-    enemybulletY = startX + randy * 2;
-
-    screenGotoxy(enemybulletX, enemybulletY);
+      screenGotoxy(enemybulletX, enemybulletY);
+    }
   }
 }
 
@@ -84,7 +88,7 @@ void enemyShoot() {
 
   enemybulletY += 1;
 
-  if (enemybulletY == 22) {
+  if (enemybulletY == 24) {
     enemybalaativa = 1;
     return;
   }
@@ -130,13 +134,14 @@ void enemies() {
   enemymoviment = 3;
 
   for (int i = 0; i < 4; i++) {
-    if ((enemy[i][0].vivo && direction == -1 && startX <= 2) ||
-        (enemy[i][9].vivo && direction == 1 && startX + 9 * 3 >= 34)) {
+    for (int j = 0; j < 10; j++) {
+      if ((enemy[i][j].vivo && direction == -1 && startX <= 2) ||
+          (enemy[i][j].vivo && direction == 1 && startX + 9 * 3 >= 34)) {
 
-      screenGotoxy(startX + 1, startY);
-      printf("                                ");
-      direction *= -1; // Mudar direção
-      break;
+        screenGotoxy(startX + 1, startY);
+        direction *= -1; // Mudar direção
+        break;
+      }
     }
   }
 
@@ -149,8 +154,6 @@ void enemies() {
     for (int j = 0; j < 10; j++) {
 
       if (enemy[i][j].vivo) { // Imprimir apenas inimigos vivos
-        screenGotoxy(startX + j * 3, (startY + i * 2) + 1);
-        printf("    ");
 
         screenGotoxy(startX + j * 3, startY + i * 2);
         printf("  %c  ", enemy[i][j].m);
@@ -174,7 +177,6 @@ void printHello() {
   screenSetColor(CYAN, DARKGRAY);
   screenGotoxy(x, y);
   printf(" △ ");
-
 
   prevx = x;
   prevy = y;
