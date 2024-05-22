@@ -1,5 +1,6 @@
 #include <string.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 #include "keyboard.h"
 #include "screen.h"
@@ -67,18 +68,17 @@ void enemyBulletSpawn() {
     return;
 
   srand(time(NULL));
-  for (int q = 0; q < 4; q++) {
-    int randI = rand() % 10;
-    int randJ = rand() % 4;
 
-    if (enemy[randI][randJ].vivo) {
+  int randI = rand() % 10;
+  int randJ = rand() % 4;
 
-      enemybalaativa = 0;
-      enemybulletX = startX + randI * 3;
-      enemybulletY = startX + randJ * 2;
+  if (enemy[randJ][randI].vivo) {
 
-      screenGotoxy(enemybulletX, enemybulletY);
-    }
+    enemybalaativa = 0;
+    enemybulletX = startX + randI * 3;
+    enemybulletY = startX + randJ * 2;
+
+    screenGotoxy(enemybulletX, enemybulletY);
   }
 }
 
@@ -95,6 +95,7 @@ void enemyShoot() {
 
   screenSetColor(RED, DARKGRAY);
   screenGotoxy(enemybulletX, enemybulletY);
+  colisaoInimigo();
   printf("*");
 }
 
@@ -182,6 +183,18 @@ void printHello() {
   prevy = y;
 }
 
+void colisaoComNave() {
+  if ((x == enemybulletX || x == enemybulletX - 1 || x == enemybulletX + 1) && (y == enemybulletY || y == enemybulletY - 1 || y == enemybulletY + 1 )) {
+    screenGotoxy(20, 10);
+    
+    screenInit();
+
+    printf("GAME OVER\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+    exit(1);
+
+  }
+}
+
 int main() {
   static int ch = 0;
 
@@ -195,6 +208,7 @@ int main() {
 
   while (ch != 10) // enter
   {
+    colisaoComNave();
     // Handle user input
     if (keyhit()) {
       ch = readch();
