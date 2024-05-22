@@ -1,13 +1,4 @@
-/**
- * main.h
- * Created on Aug, 23th 2023
- * Author: Tiago Barros
- * Based on "From C to C++ course - 2002"
- */
-
-#include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <unistd.h>
 
 #include "keyboard.h"
@@ -15,16 +6,31 @@
 #include "timer.h"
 
 int x = 20, y = 22;
+int prevx, prevy;
 int incX = 1, incY = 1;
-int bulletX = -1, bulletY = -1;
-int bulletSpeed = 150000;
+
+int bulletX = 0, bulletY = 0;
+int bulletSpeed = 10000;
+int balaativa = 1;
+
+int enemybulletX = 0, enemybulletY = 0;
+int enemybalaativa = 1;
+int enemybalacooldown = 0;
+
+int startX = 7, startY = 3;
+
+int descer = 0;
+static int direction = 1; // 1 para direita, -1 para esquerda
 
 struct enemies {
   char m;
   int vivo;
+  int death;
 };
 
-struct enemies enemy[5][10];
+int enemymoviment;
+
+struct enemies enemy[4][10];
 
 void matrizglobal() {
   for (int i = 0; i < 4; i++) {
@@ -33,98 +39,18 @@ void matrizglobal() {
       enemy[i][j].vivo = 1;
     }
   }
-  for (int j = 0; j < 10; j++) {
-    enemy[4][j].m = 'O';
-    enemy[4][j].vivo = 1;
-  }
 }
 
-void movimentar(char ch);
-
-int colisaoInimigo();
-
-void printBullet() {
-  screenSetColor(YELLOW, DARKGRAY);
-  screenGotoxy(bulletX, bulletY);
-
-  for (int i = 0; i < 20; i++) {
-    screenGotoxy(bulletX, bulletY - i);
-    printf("^");
-    usleep(bulletSpeed);
-    screenUpdate();
-    screenGotoxy(bulletX, bulletY - i);
-    printf("  ");
-    enemies();
-
-    screenSetColor(CYAN, DARKGRAY);
-
-    if (colisaoInimigo(bulletX, bulletY - i)) {
-      break;
-    }
-
-    if (keyhit()) {
-      char ch = readch();
-      if (ch == 'a' || ch == 'A' || ch == 'd' || ch == 'D') {
-
-        movimentar(ch);
-        ch = 0;
-      }
-    }
-  }
-}
-
-void movimentar(char ch) {
-  if (ch == 'a' || ch == 'A') {
-    if (x > 2) { // Verifica se não está no limite esquerdo
-      screenGotoxy(x, y);
-      printf("  ");
-      x -= 1;
-      screenGotoxy(x, y);
-      printf(" △ ");
-    }
-  } else if (ch == 'd' || ch == 'D') {
-    if (x < 36) { // Verifica se não está no limite direito
-      screenGotoxy(x, y);
-      printf("  ");
-      x += 1;
-      screenGotoxy(x, y);
-      printf(" △ ");
-    }
-  }
-  if (ch == ' ') {
-    bulletX = x + 1;
-    bulletY = y - 1;
-    printBullet();
-  }
-}
-void enemies() {
+int colisaoInimigo() {
   int x = 7, y = 3;
 
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 10; j++) {
-      screenGotoxy(x + j * 3,
-                   y + i * 2);     // Posiciona-se para imprimir o inimigo atual
-      printf("%c", enemy[i][j].m); // Imprime o inimigo atual
-      printf("  ");
-    }
-  }
-}
-int colisaoInimigo(int bulletX, int bulletY) {
-  int x = 7, y = 3;
-
-  for (int i = 0; i < 5; i++) {
-    for (int j = 0; j < 10; j++) {
-      if (bulletX == x + j * 3 && bulletY == y + i * 2 &&
+      if ((bulletX == startX + j * 3 || bulletX == (startX + j * 3)+1 || bulletX == (startX + j * 3)-1) && (bulletY == startY + i * 2 || bulletY == (startY + i * 2)-1 || bulletY == (startY + i * 2)+1) &&
           enemy[i][j].vivo == 1) {
-
         enemy[i][j].vivo = 0;
         enemy[i][j].m = 'X';
-        enemies();
-        screenUpdate();
-        usleep(200000);
-
-        enemy[i][j].m = ' ';
-        enemies();
+        enemy[i][j].death = 5;
         return 1;
       }
     }
@@ -132,55 +58,127 @@ int colisaoInimigo(int bulletX, int bulletY) {
 
   return 0;
 }
-void printHello(int nextX, int nextY) {
+
+void enemyBulletSpawn() {
+  if (enemybalaativa == 0)
+    return;
+
+  srand(time(NULL));
+
+  int randx = rand() % 10;
+  int randy = rand() % 4;
+
+  if (enemy[randx][randy].vivo) {
+
+    enemybalaativa = 0;
+    enemybulletX = startX + randx * 3;
+    enemybulletY = startX + randy * 2;
+
+    screenGotoxy(enemybulletX, enemybulletY);
+  }
+}
+
+void enemyShoot() {
+  screenGotoxy(enemybulletX, enemybulletY);
+  printf(" ");
+
+  enemybulletY += 1;
+
+  if (enemybulletY == 22) {
+    enemybalaativa = 1;
+    return;
+  }
+
+  screenSetColor(RED, DARKGRAY);
+  screenGotoxy(enemybulletX, enemybulletY);
+  printf("*");
+}
+
+void printBullet() {
+  screenSetColor(CYAN, DARKGRAY);
+  screenGotoxy(bulletX, bulletY);
+
+  screenGotoxy(bulletX, bulletY);
+  printf("  ");
+
+  bulletY -= 1;
+
+  if (colisaoInimigo(bulletX, bulletY)) {
+    screenGotoxy(bulletX, bulletY);
+    printf("  ");
+    balaativa = 1;
+    return;
+  }
+
+  if (bulletY == 1) {
+    balaativa = 1;
+    return;
+  }
+
+  screenGotoxy(bulletX, bulletY);
+  printf("^");
+  usleep(bulletSpeed);
+
+  screenSetColor(CYAN, DARKGRAY);
+}
+
+void enemies() {
+  if (enemymoviment > 0) {
+    enemymoviment--;
+    return;
+  }
+  enemymoviment = 3;
+
+  for (int i = 0; i < 4; i++) {
+    if ((enemy[i][0].vivo && direction == -1 && startX <= 2) ||
+        (enemy[i][9].vivo && direction == 1 && startX + 9 * 3 >= 34)) {
+
+      screenGotoxy(startX + 1, startY);
+      printf("                                ");
+      direction *= -1; // Mudar direção
+      break;
+    }
+  }
+
+  // Atualizar a posição dos inimigos
+  startX += direction;
+  enemyBulletSpawn();
+
+  // Imprimir os inimigos na nova posição
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 10; j++) {
+
+      if (enemy[i][j].vivo) { // Imprimir apenas inimigos vivos
+        screenGotoxy(startX + j * 3, (startY + i * 2) + 1);
+        printf("    ");
+
+        screenGotoxy(startX + j * 3, startY + i * 2);
+        printf("  %c  ", enemy[i][j].m);
+
+      } else {
+        screenGotoxy(startX + j * 3, startY + i * 2);
+        if (enemy[i][j].vivo == 0 && enemy[i][j].death > 0) {
+          printf(" %c ", enemy[i][j].m);
+          enemy[i][j].death -= 1;
+        } else
+          printf("    ");
+      }
+    }
+  }
+}
+
+void printHello() {
   static int ch = 0;
+  screenGotoxy(prevx, prevy);
+  printf("  ");
   screenSetColor(CYAN, DARKGRAY);
   screenGotoxy(x, y);
   printf(" △ ");
 
-  movimentar(ch);
+
+  prevx = x;
+  prevy = y;
 }
-
-void enemyShoot() {
-    for (int i = 0; i < 5; i++) {
-        for (int j = 0; j < 10; j++) {
-            if (enemy[i][j].vivo && i < 4 && !enemy[i + 1][j].vivo) {
-                
-                    int bulletX = (7 + j * 3 + 1) - 1;   // Posição x da bala
-                    int bulletY = 3 + i * 2 + 1;   // Posição y da bala
-                    // Disparar a bala
-                    
-                    for(int l = 0; l < 20; l++){
-                      screenSetColor(RED, DARKGRAY);
-                      screenGotoxy(bulletX, bulletY + l);
-                      printf("*");
-                      usleep(bulletSpeed);
-                      screenUpdate();
-
-                      screenGotoxy(bulletX, bulletY + l);
-                      printf(" ");
-
-                      if (keyhit()) {
-                        char ch = readch();
-                        if (ch == 'a' || ch == 'A' || ch == 'd' || ch == 'D' || ch == ' ') {
-
-                          movimentar(ch);
-                          ch = 0;
-                        }
-                      }
-                      if(bulletY + l == 22){
-                        break;
-                      }
-                    }      
-                  
-                    // Apagar a bala após um curto intervalo
-                    screenGotoxy(bulletX, bulletY);
-                    printf(" ");
-                }
-            }
-        }
-    }
-
 
 int main() {
   static int ch = 0;
@@ -195,17 +193,42 @@ int main() {
 
   while (ch != 10) // enter
   {
-    enemyShoot();
     // Handle user input
     if (keyhit()) {
       ch = readch();
+    }
+    if (timerTimeOver() == 1) {
 
-      movimentar(ch);
-      printHello(x, y);
+      // movimentar
+      if (ch == 'a' || ch == 'A') {
+        if (x > 2) { // Verifica se não está no limite esquerdo
+          x -= 2;
+        }
+        ch = 0;
+      } else if (ch == 'd' || ch == 'D') {
+        if (x < 36) { // Verifica se não está no limite direito
+          x += 2;
+        }
+        ch = 0;
+      }
+
+      if (ch == ' ' && balaativa == 1) {
+        bulletX = x;
+        bulletY = y - 1;
+        balaativa = 0;
+        ch = 0;
+      }
+      screenGotoxy(2, 2);
+      printf(" %d ", enemybalaativa);
+
+      printHello();
+      if (balaativa == 0)
+        printBullet();
+      enemies();
+      if (enemybalaativa == 0)
+        enemyShoot();
       screenUpdate();
     }
-    enemies();
-    usleep(50000);
   }
 
   keyboardDestroy();
