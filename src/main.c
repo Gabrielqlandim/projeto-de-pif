@@ -24,7 +24,12 @@ int descer = 0;
 static int direction = 1; // 1 para direita, -1 para esquerda
 
 int score = 0;
-int high_score = 0;
+int high_score;
+
+int multiplicador = 10;
+
+int contadorVictory = 0;
+
 
 struct enemies {
   char m;
@@ -50,20 +55,19 @@ int colisaoInimigo() {
 
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 10; j++) {
-      if ((bulletX == startX + j * 3 || bulletX == (startX + j * 3) + 1 ||
-           bulletX == (startX + j * 3) - 1) &&
-          (bulletY == startY + i * 2 || bulletY == (startY + i * 2) - 1 ||
-           bulletY == (startY + i * 2) + 1) &&
-            enemy[i][j].vivo == 1) {
+      
+      if ((bulletX == startX + j * 3 || bulletX == startX + j * 3 + 1 || bulletX == (startX +  j * 3) + 2 &&
+        (bulletY == startY + i * 2) && (enemy[i][j].vivo == 1) {
+        
             enemy[i][j].vivo = 0;
             enemy[i][j].m = 'X';
             enemy[i][j].death = 5;
             score=score+50;
+            contadorVictory += 1;
             return 1;
+        }
       }
     }
-  }
-
   return 0;
 }
 
@@ -101,6 +105,7 @@ void enemyShoot() {
   screenGotoxy(enemybulletX, enemybulletY);
   colisaoInimigo();
   printf("*");
+  colisaoComNave();
 }
 
 void printBullet() {
@@ -110,12 +115,14 @@ void printBullet() {
   screenGotoxy(bulletX, bulletY);
   printf("  ");
 
-  bulletY -= 1;
+  bulletY -= 1;                  // faz a bala subir
 
   if (colisaoInimigo(bulletX, bulletY)) {
     screenGotoxy(bulletX, bulletY);
     printf("  ");
     balaativa = 1;
+    bulletX = 0;
+    bulletY = 0;
     return;
   }
 
@@ -188,17 +195,48 @@ void printHello() {
 }
 
 void colisaoComNave() {
-  if ((x == enemybulletX || x == enemybulletX - 1 || x == enemybulletX + 1) && (y == enemybulletY || y == enemybulletY - 1 || y == enemybulletY + 1 )) {
-    screenGotoxy(20, 10);
+  if ((x == enemybulletX || x == (enemybulletX + 1) || x == (enemybulletX - 1)) && y == enemybulletY) {
+    score *= multiplicador;
     
-    screenInit();
-
-    printf("GAME OVER\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-    exit(1);
-
+    if (score>high_score){
+      FILE *file = fopen("recorde.txt", "w");
+      if(file != NULL) fprintf(file,"%d",score);
+      fclose(file);
+      high_score=score;
+    }
+    
+    screenClear();
+    screenGotoxy(20, 10);
+    printf("GAME OVER");
+    screenGotoxy(20, 12);
+    printf("SCORE: %d", score );
+    screenGotoxy(20, 14);
+    printf("HIGH SCORE: %d\n\n\n\n\n\n\n\n\n\n", high_score);
+    exit(0);
   }
 }
 
+void victory(){
+  if(contadorVictory == 40){
+  score *= multiplicador;
+
+  if (score>high_score){
+    FILE *file = fopen("recorde.txt", "w");
+    if(file != NULL) fprintf(file,"%d",score);
+    fclose(file);
+    high_score=score;
+  }
+
+    screenClear();
+    screenGotoxy(20, 10);
+    printf("VICTORY");
+    screenGotoxy(20, 12);
+    printf("SCORE: %d", score );
+    screenGotoxy(20, 14);
+    printf("HIGH SCORE: %d\n\n\n\n\n\n\n\n\n\n", high_score);
+    exit(0);
+  }
+}
 int main() {
   static int ch = 0;
 
@@ -208,21 +246,34 @@ int main() {
 
   screenUpdate();
 
-  FILE *file = fopen("highscore.txt", "r");
+  FILE *file = fopen("recorde.txt", "r");
   if (file != NULL) fscanf(file, "%d", &high_score);
   fclose(file);
 
   matrizglobal();
-
+  int loop = 1;
   while (ch != 10) // enter
-  {
+  {  
+    
     colisaoComNave();
+    victory();
     // Handle user input
     if (keyhit()) {
       ch = readch();
     }
     if (timerTimeOver() == 1) {
 
+      loop += 1;
+
+      if(loop == 300){
+        loop = 0;
+        multiplicador -= 1;
+
+        if(multiplicador == 0){
+          multiplicador = 1;
+        }
+      }
+      
       // movimentar
       if (ch == 'a' || ch == 'A') {
         if (x > 2) { // Verifica se não está no limite esquerdo
@@ -242,8 +293,9 @@ int main() {
         balaativa = 0;
         ch = 0;
       }
-      screenGotoxy(2, 2);
-      printf(" %d ", enemybalaativa);
+
+       screenGotoxy(2, 0);
+       printf("Score: %d ", score);
 
       printHello();
       if (balaativa == 0)
@@ -256,13 +308,11 @@ int main() {
   }
 
   if (score>high_score){
-    file = fopen("highscore.txt", "w");
-    if(file != NULL) fprintf(highscore,"%d",score);
+    file = fopen("recorde.txt", "w");
+    if(file != NULL) fprintf(file,"%d",score);
     fclose(file);
   }
-
   
-
   keyboardDestroy();
   screenDestroy();
   timerDestroy();
