@@ -1,6 +1,6 @@
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <stdlib.h>
 
 #include "keyboard.h"
 #include "screen.h"
@@ -30,7 +30,6 @@ int multiplicador = 10;
 
 int contadorVictory = 0;
 
-
 struct enemies {
   char m;
   int vivo;
@@ -55,19 +54,19 @@ int colisaoInimigo() {
 
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 10; j++) {
-      
-      if ((bulletX == startX + j * 3 || bulletX == startX + j * 3 + 1 || bulletX == (startX +  j * 3) + 2 &&
-        (bulletY == startY + i * 2) && (enemy[i][j].vivo == 1) {
-        
-            enemy[i][j].vivo = 0;
-            enemy[i][j].m = 'X';
-            enemy[i][j].death = 5;
-            score=score+50;
-            contadorVictory += 1;
-            return 1;
-        }
+
+      if ((bulletX == startX + j * 3 || bulletX == (startX + j * 3) + 1 ||
+           bulletX == (startX + j * 3) + 2) &&
+          bulletY == startY + i * 2 && (enemy[i][j].vivo == 1)) {
+        enemy[i][j].vivo = 0;
+        enemy[i][j].m = 'X';
+        enemy[i][j].death = 5;
+        score = score + 50;
+        contadorVictory += 1;
+        return 1;
       }
     }
+  }
   return 0;
 }
 
@@ -115,7 +114,7 @@ void printBullet() {
   screenGotoxy(bulletX, bulletY);
   printf("  ");
 
-  bulletY -= 1;                  // faz a bala subir
+  bulletY -= 1; // faz a bala subir
 
   if (colisaoInimigo(bulletX, bulletY)) {
     screenGotoxy(bulletX, bulletY);
@@ -131,6 +130,7 @@ void printBullet() {
     return;
   }
 
+  screenSetColor(YELLOW, DARKGRAY);
   screenGotoxy(bulletX, bulletY);
   printf("^");
   usleep(bulletSpeed);
@@ -160,6 +160,8 @@ void enemies() {
   // Atualizar a posição dos inimigos
   startX += direction;
   enemyBulletSpawn();
+
+  screenSetColor(RED, DARKGRAY);
 
   // Imprimir os inimigos na nova posição
   for (int i = 0; i < 4; i++) {
@@ -195,47 +197,58 @@ void printHello() {
 }
 
 void colisaoComNave() {
-  if ((x == enemybulletX || x == (enemybulletX + 1) || x == (enemybulletX - 1)) && y == enemybulletY) {
+  if ((x == enemybulletX || x == (enemybulletX + 1) ||
+       x == (enemybulletX - 1)) &&
+      y == enemybulletY) {
     score *= multiplicador;
-    
-    if (score>high_score){
+
+    if (score > high_score) {
       FILE *file = fopen("recorde.txt", "w");
-      if(file != NULL) fprintf(file,"%d",score);
+      if (file != NULL)
+        fprintf(file, "%d", score);
       fclose(file);
-      high_score=score;
+      high_score = score;
     }
-    
+
     screenClear();
     screenGotoxy(20, 10);
     printf("GAME OVER");
     screenGotoxy(20, 12);
-    printf("SCORE: %d", score );
+    printf("SCORE: %d", score);
     screenGotoxy(20, 14);
     printf("HIGH SCORE: %d\n\n\n\n\n\n\n\n\n\n", high_score);
     exit(0);
   }
 }
 
-void victory(){
-  if(contadorVictory == 40){
-  score *= multiplicador;
+void victory() {
+  if (contadorVictory == 40) {
+    score *= multiplicador;
 
-  if (score>high_score){
-    FILE *file = fopen("recorde.txt", "w");
-    if(file != NULL) fprintf(file,"%d",score);
-    fclose(file);
-    high_score=score;
-  }
+    if (score > high_score) {
+      FILE *file = fopen("recorde.txt", "w");
+      if (file != NULL)
+        fprintf(file, "%d", score);
+      fclose(file);
+      high_score = score;
+    }
 
     screenClear();
     screenGotoxy(20, 10);
     printf("VICTORY");
     screenGotoxy(20, 12);
-    printf("SCORE: %d", score );
+    printf("SCORE: %d", score);
     screenGotoxy(20, 14);
     printf("HIGH SCORE: %d\n\n\n\n\n\n\n\n\n\n", high_score);
     exit(0);
   }
+}
+
+showScore() {
+  screenSetColor(YELLOW, DARKGRAY);
+
+  screenGotoxy(2, 0);
+  printf("Score: %d ", score);
 }
 int main() {
   static int ch = 0;
@@ -247,14 +260,15 @@ int main() {
   screenUpdate();
 
   FILE *file = fopen("recorde.txt", "r");
-  if (file != NULL) fscanf(file, "%d", &high_score);
+  if (file != NULL)
+    fscanf(file, "%d", &high_score);
   fclose(file);
 
   matrizglobal();
   int loop = 1;
   while (ch != 10) // enter
-  {  
-    
+  {
+
     colisaoComNave();
     victory();
     // Handle user input
@@ -265,15 +279,15 @@ int main() {
 
       loop += 1;
 
-      if(loop == 300){
+      if (loop == 300) {
         loop = 0;
         multiplicador -= 1;
 
-        if(multiplicador == 0){
+        if (multiplicador == 0) {
           multiplicador = 1;
         }
       }
-      
+
       // movimentar
       if (ch == 'a' || ch == 'A') {
         if (x > 2) { // Verifica se não está no limite esquerdo
@@ -294,8 +308,7 @@ int main() {
         ch = 0;
       }
 
-       screenGotoxy(2, 0);
-       printf("Score: %d ", score);
+      showScore();
 
       printHello();
       if (balaativa == 0)
@@ -307,12 +320,13 @@ int main() {
     }
   }
 
-  if (score>high_score){
+  if (score > high_score) {
     file = fopen("recorde.txt", "w");
-    if(file != NULL) fprintf(file,"%d",score);
+    if (file != NULL)
+      fprintf(file, "%d", score);
     fclose(file);
   }
-  
+
   keyboardDestroy();
   screenDestroy();
   timerDestroy();
