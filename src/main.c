@@ -38,15 +38,30 @@ struct enemies {
 
 int enemymoviment;
 
-struct enemies enemy[4][10];
+struct enemy **enemies;
+
+void alocar() {
+  enemies = (struct enemy **)malloc(4 * sizeof(struct enemy *));
+  for (int i = 0; i < 4; i++) {
+      enemies[i] = (struct enemy *)malloc(10 * sizeof(struct enemy));
+  }
+}
+
+void freeEnemies() {
+  for (int i = 0; i < 4; i++) {
+      free(enemies[i]);
+  }
+  free(enemies);
+}
 
 void matrizglobal() {
-  for (int i = 0; i < 4; i++) {
-    for (int j = 0; j < 10; j++) {
-      enemy[i][j].m = 'M';
-      enemy[i][j].vivo = 1;
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 10; j++) {
+            enemies[i][j].m = 'M';
+            enemies[i][j].vivo = 1;
+            enemies[i][j].death = 0;
+        }
     }
-  }
 }
 
 int colisaoInimigo() {
@@ -217,6 +232,7 @@ void colisaoComNave() {
     printf("SCORE: %d", score);
     screenGotoxy(20, 14);
     printf("HIGH SCORE: %d\n\n\n\n\n\n\n\n\n\n", high_score);
+    freeEnemies()
     exit(0);
   }
 }
@@ -240,6 +256,7 @@ void victory() {
     printf("SCORE: %d", score);
     screenGotoxy(20, 14);
     printf("HIGH SCORE: %d\n\n\n\n\n\n\n\n\n\n", high_score);
+    freeEnemies()
     exit(0);
   }
 }
@@ -265,6 +282,9 @@ int main() {
   fclose(file);
 
   matrizglobal();
+  allocar();
+  initializeEnemies();
+  
   int loop = 1;
   while (ch != 10) // enter
   {
@@ -276,7 +296,7 @@ int main() {
       ch = readch();
     }
     if (timerTimeOver() == 1) {
-
+  
       loop += 1;
 
       if (loop == 300) {
