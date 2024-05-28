@@ -19,9 +19,9 @@ int x = 20, y = 22;                     // Posição da nave
 int prevx, prevy;                       // Posição anterior da nave
 int bulletX = 0, bulletY = 0;           // Posição da bala
 int bulletSpeed = 10000;                // Velocidade da bala
-int balaativa = 0;                      // Flag se a bala está ativa
+int balaativa = 1;                      // Flag se a bala está ativa
 int enemybulletX = 0, enemybulletY = 0; // Posição da bala do inimigo
-int enemybalaativa = 0;                 // Flag se a bala do inimigo está ativa
+int enemybalaativa = 1;                 // Flag se a bala do inimigo está ativa
 int startX = 7, startY = 3;             // Posição inicial dos inimigos
 int direction = 1; // Direção dos inimigos (1 para direita, -1 para esquerda)
 int score = 0;     // Pontuação do jogo
@@ -89,7 +89,7 @@ int colisaoInimigo() {
 
 // Faz o spawn de uma bala do inimigo
 void enemyBulletSpawn() {
-  if (enemybalaativa)
+  if (!enemybalaativa)
     return;
 
   srand(time(NULL));
@@ -97,7 +97,7 @@ void enemyBulletSpawn() {
   int randJ = rand() % 4;
 
   if (enemies[randJ][randI].vivo) {
-    enemybalaativa = 1;
+    enemybalaativa = 0;
     enemybulletX = startX + randI * 3;
     enemybulletY = startX + randJ * 2;
   }
@@ -111,7 +111,7 @@ void enemyShoot() {
   enemybulletY += 1;
 
   if (enemybulletY == 24) {
-    enemybalaativa = 0;
+    enemybalaativa = 1;
     return;
   }
 
@@ -132,14 +132,14 @@ void printBullet() {
   if (colisaoInimigo(bulletX, bulletY)) {
     screenGotoxy(bulletX, bulletY);
     printf("  ");
-    balaativa = 0;
+    balaativa = 1;
     bulletX = 0;
     bulletY = 0;
     return;
   }
 
   if (bulletY == 1) {
-    balaativa = 0;
+    balaativa = 1;
     return;
   }
 
@@ -308,10 +308,10 @@ int main() {
       }
 
       // Dispara a bala da nave
-      if (ch == ' ' && balaativa == 0) {
+      if (ch == ' ' && balaativa == 1) {
         bulletX = x;
         bulletY = y - 1;
-        balaativa = 1;
+        balaativa = 0;
         ch = 0;
       }
 
@@ -319,7 +319,7 @@ int main() {
       printHello();
 
       // Imprime a bala do jogador se estiver ativa
-      if (balaativa == 1) {
+      if (balaativa == 0) {
         printBullet();
       }
 
@@ -327,7 +327,7 @@ int main() {
       enemies();
 
       // Faz o inimigo atirar
-      if (enemybalaativa) {
+      if (enemybalaativa == 0) {
         enemyShoot();
       }
 

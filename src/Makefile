@@ -1,3 +1,9 @@
+#comandos para compilar:
+#cd src/
+#make clean
+#make
+#./pif
+
 CC = gcc
 
 # Caminho para os arquivos de cabeçalho, se houver
