@@ -12,6 +12,7 @@
 static struct timeval timer, now;
 static int delay = -1;
 
+
 void timerInit(int valueMilliSec)
 {
     delay = valueMilliSec;
