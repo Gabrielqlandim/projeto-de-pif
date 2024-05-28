@@ -8,9 +8,11 @@
   1º) Clone o repositório
   
   [git clone https://github.com/Taverna-Hub/BoxAdventure.git](https://github.com/Gabrielqlandim/projeto-de-pif.git)
+  
   2º) Entre na pasta do repositório
   
   cd src/
+  
   3º) Execute os comandos
   
   make clean
