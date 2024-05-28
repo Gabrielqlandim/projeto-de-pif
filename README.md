@@ -20,3 +20,9 @@
   make
 
   ./pif
+
+
+### 🎮 Como jogar:
+
+O objetivo do jogo é eliminar todos os 40 alienígenas. Dependendo da velocidade com que o jogo é finalizado, a pontuação varia.
+  
