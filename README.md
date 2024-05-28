@@ -3,4 +3,4 @@
 
 **Space Invaders** é um jogo de tiro desenvolvido em C, onde o jogador precisa eliminar todos inimigos.
 
-⚙️### Como rodar:
+### ⚙ Como rodar:
