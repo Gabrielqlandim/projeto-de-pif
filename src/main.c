@@ -7,47 +7,47 @@
 #include "screen.h"
 #include "timer.h"
 
-// Estrutura de um inimigo
+
 struct Enemy {
-  char m;    // Caractere para representar o inimigo na tela
-  int vivo;  // 1 se o inimigo está vivo, 0 se está morto
-  int death; // Contador para efeito de morte animada
+  char m;    
+  int vivo;  
+  int death; 
 };
 
-// Variáveis globais
-int x = 20, y = 22;                     // Posição da nave
-int prevx, prevy;                       // Posição anterior da nave
-int bulletX = 0, bulletY = 0;           // Posição da bala
-int bulletSpeed = 10000;                // Velocidade da bala
-int balaativa = 1;                      // Flag se a bala está ativa
-int enemybulletX = 0, enemybulletY = 0; // Posição da bala do inimigo
-int enemybalaativa = 1;                 // Flag se a bala do inimigo está ativa
-int startX = 7, startY = 3;             // Posição inicial dos inimigos
-int direction = 1; // Direção dos inimigos (1 para direita, -1 para esquerda)
-int score = 0;     // Pontuação do jogo
-int high_score;    // Recorde de pontuação
-int multiplicador = 10;  // Multiplicador da pontuação
-int contadorVictory = 0; // Contador de inimigos mortos
 
-// Matriz global de inimigos
+int x = 20, y = 22;                     
+int prevx, prevy;                       
+int bulletX = 0, bulletY = 0;           
+int bulletSpeed = 10000;                
+int balaativa = 1;                      
+int enemybulletX = 0, enemybulletY = 0; 
+int enemybalaativa = 1;                 
+int startX = 7, startY = 3;             
+int direction = 1; 
+int score = 0;     
+int high_score;    
+int multiplicador = 10;  
+int contadorVictory = 0; 
+
+
 struct Enemy **enemies;
 
-// Funções principais
+
 void matrizglobal();
 void freeEnemies();
-void enemies();
+void enemies_func();
 void printHello();
 void colisaoComNave();
 void victory();
 void showScore();
 
-// Funções auxiliares
+
 int colisaoInimigo();
 void enemyBulletSpawn();
 void enemyShoot();
 void printBullet();
 
-// Inicializa a matriz de inimigos
+
 void matrizglobal() {
   enemies = (struct Enemy **)malloc(4 * sizeof(struct Enemy *));
   for (int i = 0; i < 4; i++) {
@@ -60,7 +60,7 @@ void matrizglobal() {
   }
 }
 
-// Libera a memória alocada para a matriz de inimigos
+
 void freeEnemies() {
   for (int i = 0; i < 4; i++) {
     free(enemies[i]);
@@ -68,7 +68,7 @@ void freeEnemies() {
   free(enemies);
 }
 
-// Verifica se houve colisão da bala com algum inimigo
+
 int colisaoInimigo() {
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 10; j++) {
@@ -87,7 +87,7 @@ int colisaoInimigo() {
   return 0;
 }
 
-// Faz o spawn de uma bala do inimigo
+
 void enemyBulletSpawn() {
   if (!enemybalaativa)
     return;
@@ -103,7 +103,7 @@ void enemyBulletSpawn() {
   }
 }
 
-// Movimenta e imprime a bala do inimigo
+
 void enemyShoot() {
   screenGotoxy(enemybulletX, enemybulletY);
   printf(" ");
@@ -121,13 +121,13 @@ void enemyShoot() {
   printf("*");
 }
 
-// Movimenta e imprime a bala da nave
+
 void printBullet() {
   screenSetColor(CYAN, DARKGRAY);
   screenGotoxy(bulletX, bulletY);
   printf("  ");
 
-  bulletY -= 1; // Move a bala para cima
+  bulletY -= 1; 
 
   if (colisaoInimigo(bulletX, bulletY)) {
     screenGotoxy(bulletX, bulletY);
@@ -150,8 +150,8 @@ void printBullet() {
   screenSetColor(CYAN, DARKGRAY);
 }
 
-// Movimenta e imprime os inimigos
-void enemies() {
+
+void enemies_func() {
   static int enemymoviment = 0;
 
   if (enemymoviment > 0) {
@@ -165,7 +165,7 @@ void enemies() {
       if ((enemies[i][j].vivo && direction == -1 && startX <= 2) ||
           (enemies[i][j].vivo && direction == 1 && startX + 9 * 3 >= 34)) {
         screenGotoxy(startX + 1, startY);
-        direction *= -1; // Muda a direção
+        direction *= -1; 
         break;
       }
     }
@@ -194,7 +194,7 @@ void enemies() {
   }
 }
 
-// Imprime a nave do jogador
+
 void printHello() {
   screenGotoxy(prevx, prevy);
   printf("  ");
@@ -205,7 +205,7 @@ void printHello() {
   prevy = y;
 }
 
-// Verifica colisão da nave com a bala do inimigo
+
 void colisaoComNave() {
   if ((x == enemybulletX || x == (enemybulletX + 1) ||
        x == (enemybulletX - 1)) &&
@@ -232,7 +232,7 @@ void colisaoComNave() {
   }
 }
 
-// Verifica se o jogador ganhou o jogo
+
 void victory() {
   if (contadorVictory == 40) {
     score *= multiplicador;
@@ -259,19 +259,19 @@ void victory() {
   }
 }
 
-// Imprime a pontuação na tela
+
 void showScore() {
   screenSetColor(YELLOW, DARKGRAY);
   screenGotoxy(2, 0);
   printf("Score: %d ", score);
 }
 
-// Função principal
+
 int main() {
   int ch = 0;
   screenInit(1);
   keyboardInit();
-  timerInit(50);
+  timerInit(150);
   screenUpdate();
 
   FILE *file = fopen("recorde.txt", "r");
@@ -282,7 +282,7 @@ int main() {
 
   matrizglobal();
 
-  while (ch != 10) { // Enter
+  while (ch != 10) { 
     colisaoComNave();
     victory();
 
@@ -291,10 +291,10 @@ int main() {
     }
 
     if (timerTimeOver() == 1) {
-      // Atualiza a pontuação
+
       showScore();
 
-      // Movimenta a nave do jogador
+
       if (ch == 'a' || ch == 'A') {
         if (x > 2) {
           x -= 2;
@@ -307,7 +307,7 @@ int main() {
         ch = 0;
       }
 
-      // Dispara a bala da nave
+
       if (ch == ' ' && balaativa == 1) {
         bulletX = x;
         bulletY = y - 1;
@@ -315,18 +315,18 @@ int main() {
         ch = 0;
       }
 
-      // Imprime a nave do jogador
+
       printHello();
 
-      // Imprime a bala do jogador se estiver ativa
+
       if (balaativa == 0) {
         printBullet();
       }
 
-      // Movimenta e imprime os inimigos
-      enemies();
 
-      // Faz o inimigo atirar
+      enemies_func();
+
+
       if (enemybalaativa == 0) {
         enemyShoot();
       }
